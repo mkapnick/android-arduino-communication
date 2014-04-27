@@ -13,13 +13,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Handler;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -28,31 +28,38 @@ public class MainActivity extends ActionBarActivity {
     private BluetoothAdapter            mBluetoothAdapter;
     private final int                   REQUEST_ENABLE_BT = 1;
     private BluetoothSocket             mmSocket;
-    private Handler                     mHandler;
-    private ConnectThread               cThread;
     private OutputStream                mmOutputStream;
+    private InputStream                 mmInputStream;
     private BluetoothDevice             device;
     private boolean                     isOn;
+    private ReadThread                  readThread;
+    private TextView                    textview;
+    private  int                         bytes = 0;
 
 
+    public int getBytes()
+    {
+        return bytes;
+    }
+
+    public void setBytes(int bytes)
+    {
+        this.bytes = bytes;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        button = (Button) findViewById(R.id.powerLED);
+        button      = (Button) findViewById(R.id.powerLED);
+        textview    = (TextView) findViewById(R.id.temperature);
         isOn = false;
         System.out.println("Setting up bluetooth");
         setUpBlueTooth();
         pairDevices();
-        setUpOutputStream();
-        //enableDiscoverability();
-        /*System.out.println("Discovering devices..");
-        discoverDevices();
-        System.out.println("Connecting as client..");
-        connectAsClient();
-        System.out.println("Done connecting as client");*/
-
+        setUpInputAndOutputStream();
+        readThread  = new ReadThread(mmInputStream,textview, this);
+        readThread.start();
     }
 
 
@@ -79,7 +86,7 @@ public class MainActivity extends ActionBarActivity {
                 }
                 else
                 {
-                    bytes = "0".getBytes();
+                    bytes = "d".getBytes();
                     try {
                         mmOutputStream.write(bytes);
                     } catch (IOException e) {
@@ -111,7 +118,9 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    private void setUpOutputStream()
+
+
+    private void setUpInputAndOutputStream()
     {
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //Standard SerialPortService ID
 
@@ -121,10 +130,15 @@ public class MainActivity extends ActionBarActivity {
         try {
             mmSocket = localDevice.createRfcommSocketToServiceRecord(uuid);
             mmSocket.connect();
-            mmOutputStream = mmSocket.getOutputStream();
+            mmOutputStream  = mmSocket.getOutputStream();
+            mmInputStream   = mmSocket.getInputStream();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
+
+
     }
 
     private void setUpBlueTooth()
