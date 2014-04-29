@@ -13,7 +13,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,21 +34,13 @@ public class MainActivity extends ActionBarActivity {
     private OutputStream                mmOutputStream;
     private InputStream                 mmInputStream;
     private BluetoothDevice             device;
-    private boolean                     isOn;
+    private boolean                     isArmed;
     private ReadThread                  readThread;
     private TextView                    textview;
-    private  int                         bytes = 0;
+    private EditText                    passcode;
+    private ImageView                   ledColor;
 
 
-    public int getBytes()
-    {
-        return bytes;
-    }
-
-    public void setBytes(int bytes)
-    {
-        this.bytes = bytes;
-    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,13 +48,17 @@ public class MainActivity extends ActionBarActivity {
 
         button      = (Button) findViewById(R.id.powerLED);
         textview    = (TextView) findViewById(R.id.temperature);
-        isOn = false;
-        System.out.println("Setting up bluetooth");
+        ledColor    = (ImageView) findViewById(R.id.ledColor);
+        textview.setVisibility(View.INVISIBLE);
+        passcode    = (EditText) findViewById(R.id.passcode);
+        isArmed     = false;
+
         setUpBlueTooth();
         pairDevices();
         setUpInputAndOutputStream();
+
         readThread  = new ReadThread(mmInputStream,textview, this);
-        readThread.start();
+        //readThread.start();
     }
 
 
@@ -70,33 +69,63 @@ public class MainActivity extends ActionBarActivity {
     public void buttonClick(View view)
     {
         byte [] bytes;
-        switch(view.getId())
-        {
-            case R.id.powerLED:
-                if(!isOn) {
-                    bytes = "a".getBytes();
-                    try {
-                        mmOutputStream.write(bytes);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    isOn = true;
-                    button.setText("Power LED Off");
-                    break;
-                }
-                else
-                {
-                    bytes = "d".getBytes();
-                    try {
-                        mmOutputStream.write(bytes);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    isOn = false;
-                    button.setText("Power LED On");
+        String code;
 
-                    break;
+        code = passcode.getText().toString();
+
+        if(!code.isEmpty())
+        {
+
+            if(code.equalsIgnoreCase("1234"))
+            {
+
+                switch (view.getId())
+                {
+                    case R.id.powerLED:
+                        if (!isArmed) {
+                            bytes = "a".getBytes();
+                            try {
+                                mmOutputStream.write(bytes);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            isArmed = true;
+                            button.setText("Disarm");
+                            textview.setVisibility(View.VISIBLE);
+                            passcode.setVisibility(View.INVISIBLE);
+                            ledColor.setBackgroundResource(R.drawable.red);
+                            readThread.start();
+                            Toast.makeText(this, "System is armed", Toast.LENGTH_LONG).show();
+
+                            break;
+                        } else {
+                            bytes = "d".getBytes();
+                            try {
+                                mmOutputStream.write(bytes);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            isArmed = false;
+                            button.setText("Arm");
+                            textview.setVisibility(View.INVISIBLE);
+                            passcode.setVisibility(View.VISIBLE);
+                            ledColor.setBackgroundResource(R.drawable.green);
+                            Toast.makeText(this, "System is disarmed", Toast.LENGTH_LONG).show();
+                            passcode.setText("");
+                            break;
+                        }
                 }
+
+            }
+            else
+            {
+                Toast.makeText(this, "Passcode incorrect", Toast.LENGTH_LONG).show();
+
+            }
+        }
+        else
+        {
+            Toast.makeText(this, "Enter a passcode", Toast.LENGTH_LONG).show();
         }
     }
 

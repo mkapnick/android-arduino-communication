@@ -59,4 +59,13 @@ public class ReadThread implements Runnable
         thread.start();
     }
 
+    public void block()
+    {
+        try {
+            thread.wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -5,16 +5,24 @@
     tools:context="kap.arduino480.app.MainActivity"
     android:background="#ffffff">
 
-
-    <Button
+    <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Power LED On"
-        android:id="@+id/powerLED"
+        android:id="@+id/passcode"
+        android:inputType="number"
+        android:hint="Enter passcode"
+        android:textSize="30dp"
         android:layout_below="@+id/imageView"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"
-        android:onClick="buttonClick"/>
+        android:layout_marginTop="50dp"
+        android:background="#4C5054"
+        android:textColor="#fff"
+        android:password="true"
+        android:padding="25dp"
+        android:gravity="center"
+        />
+
+
 
     <ImageView
         android:layout_width="wrap_content"
@@ -22,7 +30,7 @@
         android:id="@+id/imageView"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="73dp"
+        android:layout_marginTop="90dp"
         android:background="@drawable/arduino_community_logo"/>
 
     <TextView
@@ -30,9 +38,32 @@
         android:layout_height="wrap_content"
         android:text="Temperature: "
         android:id="@+id/temperature"
-        android:layout_below="@+id/powerLED"
-        android:layout_marginLeft="23dp"
-        android:layout_marginTop="134dp"
-        android:textSize="20dp"/>
+        android:textSize="20dp"
+        android:layout_marginLeft="25dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+       />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Arm"
+        android:textSize="20dp"
+        android:id="@+id/powerLED"
+        android:layout_marginTop="30dp"
+        android:onClick="buttonClick"
+        android:layout_below="@+id/passcode"
+        android:layout_alignRight="@+id/passcode"
+        android:layout_marginRight="20dp"
+        android:padding="20dp"/>
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/ledColor"
+        android:background="@drawable/green"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/powerLED" />
+
 
 </RelativeLayout>
